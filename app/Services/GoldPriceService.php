@@ -3,7 +3,7 @@ namespace Modules\GoldPrice\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Modules\GoldPrice\Entities\GoldPrice;
+use Modules\GoldPrice\Models\GoldPrice;
 
 class GoldPriceService
 {
