@@ -5,6 +5,6 @@ return [
   "hooks" => [
     "enabled" => env("GOLDPRICE_HOOKS_ENABLED", true),
     "service" => \Modules\CoreUI\Services\UIService::class,
-    "name" => "dashboard-apps",
+    "name" => "main-apps",
   ],
 ];
