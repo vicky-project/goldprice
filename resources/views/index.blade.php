@@ -29,12 +29,14 @@
       <div id="loading-table" class="text-center d-none">
         Loading...
       </div>
-      <table class="table table-bordered" id="price-table">
-        <thead>
-          <tr><th>Mata Uang</th><th>Ounce</th><th>Gram</th><th>Tola</th><th>Update</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-bordered" id="price-table">
+          <thead>
+            <tr><th>Mata Uang</th><th>Ounce</th><th>Gram</th><th>Tola</th><th>Update</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
     <div class="col-md-6">
       <h4>Chart History</h4>
