@@ -1,25 +1,49 @@
 @extends('coreui::layouts.mini-app')
 
 @section('content')
-<div class="container mt-4">
-  <h2>Harga Emas Dunia</h2>
+<div class="container py-3">
+  <div class="row justify-content-center mb-3">
+    <div class="col-md-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <a href="{{ route('telegram.home') }}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i>Kembali
+        </a>
+        @if($telegramUser)
+        <a href="{{ route('apps.prayer.settings') }}" class="btn btn-outline-secondary">
+          <i class="bi bi-gear-fill fs-5"></i>
+        </a>
+        @endif
+      </div>
+    </div>
+  </div>
   <div class="row mb-3">
-    <div class="col-md-3">
-      <label>Mata Uang</label>
-      <select id="currency-select" class="form-select">
-        <option value="">-- Pilih Mata Uang --</option>
-      </select>
-    </div>
-    <div class="col-md-3">
-      <label>Rentang Hari (Chart)</label>
-      <select id="days-select" class="form-select">
-        <option value="7">7 hari</option>
-        <option value="30" selected>30 hari</option>
-        <option value="90">90 hari</option>
-      </select>
-    </div>
-    <div class="col-md-3 align-self-end">
-      <button id="refresh-btn" class="btn btn-primary">Refresh</button>
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0"><i class="bi bi-gem2 me-2"></i>Harga Emas Dunia</h4>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label>Mata Uang</label>
+              <select id="currency-select" class="form-select">
+                <option value="">-- Pilih Mata Uang --</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label>Rentang Hari (Chart)</label>
+              <select id="days-select" class="form-select">
+                <option value="7">7 hari</option>
+                <option value="30" selected>30 hari</option>
+                <option value="90">90 hari</option>
+              </select>
+            </div>
+            <div class="col-md-3 align-self-end">
+              <button id="refresh-btn" class="btn btn-primary">Refresh</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
