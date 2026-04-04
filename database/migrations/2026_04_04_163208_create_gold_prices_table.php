@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-  public function up() {
+  public function up(): void
+  {
     Schema::create('gold_prices', function (Blueprint $table) {
       $table->id();
       $table->string('currency', 3)->index(); // e.g. USD, IDR, JPY
@@ -17,7 +18,8 @@ return new class extends Migration
     });
   }
 
-  public function down() {
+  public function down(): void
+  {
     Schema::dropIfExists('gold_prices');
   }
-}
+};
