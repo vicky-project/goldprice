@@ -144,3 +144,55 @@
   fetchCurrencies().then(() => loadAll());
 </script>
 @endsection
+
+@push('styles')
+<style>
+  /* Tema Telegram */
+  body {
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+  }
+  .card {
+    background-color: var(--tg-theme-secondary-bg-color);
+    border: none;
+  }
+  .card-header {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border-bottom: none;
+  }
+  .btn-primary {
+    background-color: var(--tg-theme-button-color);
+    border-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+  }
+  .btn-outline-primary {
+    color: var(--tg-theme-button-color);
+    border-color: var(--tg-theme-button-color);
+  }
+  .btn-outline-primary:hover {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+  }
+  .btn-outline-secondary {
+    color: var(--tg-theme-hint-color);
+    border-color: var(--tg-theme-hint-color);
+  }
+  .btn-outline-secondary:hover {
+    background-color: var(--tg-theme-hint-color);
+    color: var(--tg-theme-button-text-color);
+  }
+  .text-muted {
+    color: var(--tg-theme-text-color) !important;
+  }
+  .table {
+    color: var(--tg-theme-text-color);
+  }
+  .table-hover tbody tr:hover {
+    background-color: text-white;
+  }
+  .table td, .table th {
+    border-color: var(--tg-theme-section-separator-color);
+  }
+</style>
+@endpush
