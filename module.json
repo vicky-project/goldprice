@@ -1,0 +1,11 @@
+{
+    "name": "GoldPrice",
+    "alias": "goldprice",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\GoldPrice\\Providers\\GoldPriceServiceProvider"
+    ],
+    "files": []
+}

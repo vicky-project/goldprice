@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/goldprice",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\GoldPrice\\": "app/",
+            "Modules\\GoldPrice\\Database\\Factories\\": "database/factories/",
+            "Modules\\GoldPrice\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\GoldPrice\\Tests\\": "tests/"
+        }
+    }
+}
