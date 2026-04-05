@@ -2,6 +2,7 @@
 namespace Modules\GoldPrice\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Modules\GoldPrice\Services\GoldPriceService;
 
 class UpdateGoldPrices extends Command
