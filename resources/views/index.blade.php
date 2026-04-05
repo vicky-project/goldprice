@@ -21,7 +21,12 @@
           <div class="row mb-3">
             <div class="col-md-3">
               <label>Cari Mata Uang</label>
-              <input type="text" id="currency-search" class="form-control" placeholder="Ketik nama atau kode mata uang...">
+              <div class="input-group">
+                <input type="text" id="currency-search" class="form-control" placeholder="Ketik nama atau kode mata uang...">
+                <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Hapus pencarian">
+                  <i class="bi bi-x-lg"></i> ✖
+                </button>
+              </div>
             </div>
             <div class="col-md-3">
               <label>Mata Uang</label>
@@ -438,50 +443,58 @@
     return currencyNames[code] || code;
   }
 
-  // Jalankan setelah opsi select terisi (di dalam fetchCurrencies)
-  function initCurrencySearch() {
-    const searchInput = document.getElementById('currency-search');
+  let allCurrencies = []; // Menyimpan semua kode mata uang
+
+  // Fungsi untuk mengisi select berdasarkan filter
+  function renderCurrencyOptions(filterText) {
     const select = document.getElementById('currency-select');
+    const filter = filterText.toLowerCase().trim();
+    const currentValue = select.value; // simpan pilihan sebelumnya jika ada
 
-    searchInput.addEventListener('input', function() {
-    const keyword = this.value.toLowerCase().trim();
-    const options = select.options;
-    let hasVisible = false;
-
-    for (let i = 0; i < options.length; i++) {
-    const option = options[i];
-    const text = option.textContent.toLowerCase();
-    // Tampilkan jika kosong atau teks mengandung keyword
-    if (keyword === '' || text.includes(keyword)) {
-    option.style.display = '';
-    hasVisible = true;
-    } else {
-    option.style.display = 'none';
-    }
-    }
-
-    // Opsional: jika tidak ada yang cocok, tampilkan pesan
-    if (!hasVisible && keyword !== '') {
-    // Bisa tambahkan opsi pesan sementara (tidak disarankan)
-    console.log('Tidak ada mata uang yang cocok');
-    }
+    // Filter berdasarkan nama atau kode
+    const filtered = filter === '' ? allCurrencies: allCurrencies.filter(code => {
+    const displayName = currencyNames[code] || code;
+    return displayName.toLowerCase().includes(filter) || code.toLowerCase().includes(filter);
     });
 
-    select.value = "";
+    // Regenerasi opsi
+    select.innerHTML = '<option value="">-- Pilih Mata Uang --</option>';
+    filtered.forEach(code => {
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = `${currencyNames[code] || code} (${code})`;
+    select.appendChild(opt);
+    });
+
+    // Kembalikan pilihan sebelumnya jika masih tersedia
+    if (currentValue && filtered.includes(currentValue)) {
+      select.value = currentValue;
+    } else if (filtered.length === 1 && filtered[0]) {
+      // Opsional: auto-pilih jika hanya satu hasil
+      // select.value = filtered[0];
+    }
+  }
+
+  // Inisialisasi event listener untuk pencarian dan tombol clear
+  function initCurrencySearch() {
+    const searchInput = document.getElementById('currency-search');
+    const clearBtn = document.getElementById('clear-search');
+
+    searchInput.addEventListener('input', function() {
+    renderCurrencyOptions(this.value);
+    });
+
+    clearBtn.addEventListener('click', function() {
+    searchInput.value = '';
+    renderCurrencyOptions('');
+    searchInput.focus();
+    });
   }
 
   async function fetchCurrencies() {
     const res = await fetch(`${apiBase}/currencies`);
-    const data = await res.json();
-    const select = document.getElementById('currency-select');
-    select.innerHTML = '<option value="">-- Semua Mata Uang --</option>';
-    data.forEach(curr => {
-    const opt = document.createElement('option');
-    opt.value = curr;
-    opt.textContent = `${getCurrencyName(curr)} (${curr})`;
-    select.appendChild(opt);
-    });
-
+    allCurrencies = await res.json();
+    renderCurrencyOptions('');
     initCurrencySearch();
   }
 
