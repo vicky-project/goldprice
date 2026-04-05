@@ -212,7 +212,7 @@
         targetCurrency = latestData[0].currency;
         document.getElementById('currency-select').value = targetCurrency;
       }
-      if (targerCurrency) {
+      if (targetCurrency) {
         const history = await fetchHistory(targetCurrency, hours, days);
         if (history && history.length) {
           renderChart(history, 'gram');
