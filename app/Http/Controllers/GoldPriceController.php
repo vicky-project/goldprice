@@ -43,15 +43,13 @@ class GoldPriceController extends Controller
       'days' => 'nullable|integer|min:1|max:365',
     ]);
 
-    $currency = $request->input('currency');
-    $hours = $request->input('hours');
-    $days = $request->input('days', 30);
+    $currency = $request->currency;
 
     $startDate = now();
-    if ($hours) {
-      $startDate = now()->subHours($hours);
+    if ($request->has('hours')) {
+      $startDate = now()->subHours($request->hours);
     } else {
-      $startDate = now()->subDays($days);
+      $startDate = now()->subDays($request->days ?? 30);
     }
 
     $data = GoldPriceHistory::where('currency', $currency)

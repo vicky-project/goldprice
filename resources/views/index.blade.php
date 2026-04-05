@@ -196,7 +196,7 @@
     loading.classList.remove('d-none');
     try {
       const currency = document.getElementById('currency-select').value;
-      const rangeValue = document.getElementById('range-select').value;
+      const rangeValue = parseInt(document.getElementById('range-select').value, 10);
       let hours = null,
       days = 30;
       if (rangeValue <= 24) {
@@ -213,7 +213,12 @@
       }
       if (targerCurrency) {
         const history = await fetchHistory(targetCurrency, hours, days);
-        renderChart(history, 'gram');
+        if (history && history.length) {
+          renderChart(history, 'gram');
+        } else {
+          alert("No history data found for: " + targetCurrency);
+          document.getElementById('price-chart').style.display = 'none';
+        }
       }
     } catch (err) {
       console.error(err);
