@@ -61,7 +61,7 @@ class GoldPriceServiceProvider extends ServiceProvider
   protected function registerCommands(): void
   {
     $this->commands([
-      \Modules\GoldPrice\Console\ArchiveGoldPrices::class
+      \Modules\GoldPrice\Console\ArchiveGoldPrices::class,
       \Modules\GoldPrice\Console\UpdateGoldPrices::class
     ]);
   }
