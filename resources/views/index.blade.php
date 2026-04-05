@@ -127,7 +127,7 @@
     document.getElementById('price-chart').style.display = 'block';
 
     const labels = history.map(h => {
-    const dt = new Date(h.price_date):
+    const dt = new Date(h.price_date);
     return dt.toLocaleString();
     });
     const prices = history.map(h => parseFloat(h[unit]));
