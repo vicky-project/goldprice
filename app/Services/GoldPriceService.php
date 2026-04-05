@@ -14,7 +14,7 @@ class GoldPriceService
   public function fetchLatestPrices(): array
   {
     // Mengambil data
-    $response = Http::timeout(10)->get('https://goldprice.today/api.php?data=live');
+    $response = Http::timeout(3600)->get('https://goldprice.today/api.php?data=live');
     if ($response->failed()) {
       throw new \Exception('Gagal mengambil data harga emas: '.$response->body());
     }
