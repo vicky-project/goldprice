@@ -454,6 +454,7 @@
     // Tampilkan jika kosong atau teks mengandung keyword
     if (keyword === '' || text.includes(keyword)) {
     option.style.display = '';
+    option.selected = true;
     hasVisible = true;
     } else {
     option.style.display = 'none';
