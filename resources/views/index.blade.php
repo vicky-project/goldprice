@@ -26,9 +26,11 @@
               </select>
             </div>
             <div class="col-md-3">
-              <label>Rentang Hari (Chart)</label>
-              <select id="days-select" class="form-select">
-                <option value="7">7 hari</option>
+              <label>Rentang Waktu</label>
+              <select id="range-select" class="form-select">
+                <option value="6">6 jam terakhir</option>
+                <option value="24">24 jam terakhir</option>
+                <option value="7" selected>7 hari</option>
                 <option value="30" selected>30 hari</option>
                 <option value="90">90 hari</option>
               </select>
@@ -88,8 +90,14 @@
     return await res.json();
   }
 
-  async function fetchHistory(currency, days) {
-    const res = await fetch(`${apiBase}/history?currency=${currency}&days=${days}`);
+  async function fetchHistory(currency, hours = null, days = 30) {
+    let url = `${apiBase}/history?currency=${currency}`;
+    if (hours) {
+      url += `&hours=${hours}`;
+    } else {
+      url += `&days=${days}`;
+    }
+    const res = await fetch(url);
     return await res.json();
   }
 
@@ -111,23 +119,76 @@
   function renderChart(history, unit = 'gram') {
     const ctx = document.getElementById('price-chart').getContext('2d');
     if (chartInstance) chartInstance.destroy();
-    const labels = history.map(h => new Date(h.price_date).toLocaleDateString());
-    const prices = history.map(h => h[unit]);
-    chartInstance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: `Harga per ${unit}`,
-          data: prices,
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.1
-        }]
-      },
-      options: {
-        responsive: true
-      }
+
+    if (!history.length) {
+      document.getElementById('price-chart').style.display = 'none';
+      return;
+    }
+    document.getElementById('price-chart').style.display = 'block';
+
+    const labels = history.map(h => {
+    const dt = new Date(h.price_date):
+    return dt.toLocaleString();
     });
+    const prices = history.map(h => parseFloat(h[unit]));
+    chartInstance = new Chart(ctx,
+      {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: `Harga per ${unit}`,
+            data: prices,
+            borderColor: 'rgb(255, 193, 7)',
+            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+            tension: 0.2,
+            pointRadius: 2,
+            pointHoverRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.raw.toLocaleString()}`;
+                }
+              }
+            },
+            zoom: {
+              zoom: {
+                wheel: {
+                  enabled: true
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x',
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true, text: 'Waktu'
+              },
+              ticks: {
+                maxRotation: 45,
+                autoSkip: true,
+                maxTicksLimit: 10
+              }
+            },
+            y: {
+              title: {
+                display: true, text: `Harga (${unit})`
+              },
+              beginAtZero: false
+            }
+          }
+        }
+      });
   }
 
   async function loadAll() {
@@ -135,18 +196,24 @@
     loading.classList.remove('d-none');
     try {
       const currency = document.getElementById('currency-select').value;
-      const days = document.getElementById('days-select').value;
+      const rangeValue = document.getElementById('range-select').value;
+      let hours = null,
+      days = 30;
+      if (rangeValue <= 24) {
+        hours = rangeValue;
+      } else {
+        days = rangeValue;
+      }
       const latestData = await fetchLatest(currency);
       renderTable(latestData);
-      if (currency) {
-        const history = await fetchHistory(currency, days);
+      let targerCurrency = currency;
+      if (!targerCurrency && latestData.length) {
+        targerCurrency = latestData[0].currency;
+        document.getElementById('currency-select').value = targerCurrency;
+      }
+      if (targerCurrency) {
+        const history = await fetchHistory(targerCurrency, hours, days);
         renderChart(history, 'gram');
-      } else if (latestData.length > 0) {
-        // default currency pertama untuk chart
-        const firstCurrency = latestData[0].currency;
-        const history = await fetchHistory(firstCurrency, days);
-        renderChart(history, 'gram');
-        document.getElementById('currency-select').value = firstCurrency;
       }
     } catch (err) {
       console.error(err);
@@ -157,10 +224,7 @@
 
   document.getElementById('refresh-btn').addEventListener('click', loadAll);
   document.getElementById('currency-select').addEventListener('change', loadAll);
-  document.getElementById('days-select').addEventListener('change', () => {
-  const curr = document.getElementById('currency-select').value;
-  if (curr) loadAll();
-  });
+  document.getElementById('range-select').addEventListener('change', loadAll);
 
   fetchCurrencies().then(() => loadAll());
 </script>

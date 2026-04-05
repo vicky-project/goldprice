@@ -39,14 +39,23 @@ class GoldPriceController extends Controller
   public function history(Request $request) {
     $request->validate([
       'currency' => 'required|string|max:10',
-      'days' => 'nullable|integer|min:1|max:3650',
+      'hours' => 'nullable|integer|min:1|max:720',
+      'days' => 'nullable|integer|min:1|max:365',
     ]);
 
     $currency = $request->input('currency');
+    $hours = $request->input('hours');
     $days = $request->input('days', 30);
 
+    $startDate = now();
+    if ($hours) {
+      $startDate = now()->subHours($hours);
+    } else {
+      $startDate = now()->subDays($days);
+    }
+
     $data = GoldPriceHistory::where('currency', $currency)
-    ->where('price_date', '>=', now()->subDays($days))
+    ->where('price_date', '>=', $startDate)
     ->orderBy('price_date', 'asc')
     ->get(['price_date', 'ounce', 'gram', 'tola']);
 
