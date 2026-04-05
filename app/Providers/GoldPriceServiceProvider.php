@@ -75,7 +75,7 @@ class GoldPriceServiceProvider extends ServiceProvider
       //     $schedule = $this->app->make(Schedule::class);
       //     $schedule->command('inspire')->hourly();
       Schedule::command("app:goldprice")
-      ->everyMinute()
+      ->everyThreeMinutes()
       ->withoutOverlapping();
       Schedule::command("app:goldprice-archive")
       ->monthly()
