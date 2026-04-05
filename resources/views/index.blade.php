@@ -226,7 +226,12 @@
   document.getElementById('currency-select').addEventListener('change', loadAll);
   document.getElementById('range-select').addEventListener('change', loadAll);
 
-  fetchCurrencies().then(() => loadAll());
+  try {
+    fetchCurrencies().then(() => loadAll());
+  }
+  catch(e) {
+    alert(e.message)
+  }
 </script>
 @endsection
 
