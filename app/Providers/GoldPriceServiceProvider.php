@@ -61,6 +61,7 @@ class GoldPriceServiceProvider extends ServiceProvider
   protected function registerCommands(): void
   {
     $this->commands([
+      \Modules\GoldPrice\Console\ArchiveGoldPrices::class
       \Modules\GoldPrice\Console\UpdateGoldPrices::class
     ]);
   }
@@ -75,6 +76,9 @@ class GoldPriceServiceProvider extends ServiceProvider
       //     $schedule->command('inspire')->hourly();
       Schedule::command("app:goldprice")
       ->everyMinute()
+      ->withoutOverlapping();
+      Schedule::command("app:goldprice-archive")
+      ->monthly()
       ->withoutOverlapping();
     });
   }

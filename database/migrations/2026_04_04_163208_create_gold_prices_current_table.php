@@ -7,9 +7,9 @@ return new class extends Migration
 {
   public function up(): void
   {
-    Schema::create('gold_prices', function (Blueprint $table) {
+    Schema::create('gold_prices_current', function (Blueprint $table) {
       $table->id();
-      $table->string('currency', 10)->index(); // e.g. USD, IDR, JPY
+      $table->string('currency', 10)->unique(); // e.g. USD, IDR, JPY
       $table->decimal('ounce', 20, 3); // harga per ounce
       $table->decimal('gram', 20, 3); // harga per gram
       $table->decimal('tola', 20, 3); // harga per tola

@@ -9,4 +9,5 @@ Route::prefix('gold-price')
   Route::get('currencies', [GoldPriceController::class, "currencies"])->name('currencies');
   Route::get('latest', [GoldPriceController::class, "latest"])->name('latest');
   Route::get('history', [GoldPriceController::class, "history"])->name('history');
+  Route::get('archive', [GoldPriceController::class, "archive"])->name('archive');
 });

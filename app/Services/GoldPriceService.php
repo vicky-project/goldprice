@@ -2,56 +2,100 @@
 namespace Modules\GoldPrice\Services;
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
-use Modules\GoldPrice\Models\GoldPrice;
+use Illuminate\Support\Facades\Log;
+use Modules\GoldPrice\Models\GoldPriceCurrent;
+use Modules\GoldPrice\Models\GoldPriceHistory;
+use Modules\GoldPrice\Models\GoldPriceArchive;
+use Carbon\Carbon;
 
 class GoldPriceService
 {
   /**
   * Ambil data harga emas terbaru dari API eksternal.
-  * Return array dengan key
+  * Ganti URL dengan endpoint nyata.
   */
   public function fetchLatestPrices(): array
   {
-    // Mengambil data
-    $response = Http::timeout(3600)->get('https://goldprice.today/api.php?data=live');
+    $response = Http::timeout(10)->get('https://goldprice.today/api.php?data=live');
     if ($response->failed()) {
-      throw new \Exception('Gagal mengambil data harga emas: '.$response->body());
+      throw new \Exception('Gagal mengambil data harga emas: ' . $response->body());
     }
     return $response->json();
   }
 
   /**
-  * Simpan harga jika berbeda dengan record terakhir untuk currency yang sama.
-  * Return jumlah yang tersimpan.
+  * Update harga terbaru (tabel current) dan simpan history jika ada perubahan.
+  * Return jumlah mata uang yang berubah.
   */
-  public function updatePricesIfChanged(): int
+  public function updatePrices(): int
   {
     $newPrices = $this->fetchLatestPrices();
-    $saved = 0;
+    $updated = 0;
     $now = now();
 
     foreach ($newPrices as $currency => $values) {
-      $last = GoldPrice::where('currency', $currency)
-      ->orderBy('price_date', 'desc')
-      ->first();
+      $current = GoldPriceCurrent::where('currency', $currency)->first();
 
-      // Jika tidak ada record sebelumnya, atau ada perubahan nilai
-      if (!$last ||
-        $last->ounce != $values['ounce'] ||
-        $last->gram != $values['gram'] ||
-        $last->tola != $values['tola']) {
+      // Cek apakah ada perubahan
+      if ($current &&
+        $current->ounce == $values['ounce'] &&
+        $current->gram == $values['gram'] &&
+        $current->tola == $values['tola']) {
+        continue; // tidak berubah, skip
+      }
 
-        GoldPrice::create([
-          'currency' => $currency,
+      // Simpan ke history
+      GoldPriceHistory::create([
+        'currency' => $currency,
+        'ounce' => $values['ounce'],
+        'gram' => $values['gram'],
+        'tola' => $values['tola'],
+        'price_date' => $now,
+      ]);
+
+      // Update atau buat di current
+      GoldPriceCurrent::updateOrCreate(
+        ['currency' => $currency],
+        [
           'ounce' => $values['ounce'],
           'gram' => $values['gram'],
           'tola' => $values['tola'],
           'price_date' => $now,
-        ]);
-        $saved++;
-      }
+        ]
+      );
+
+      $updated++;
     }
-    return $saved;
+
+    Log::info("GoldPrice update: {$updated} currencies changed.");
+    return $updated;
+  }
+
+  /**
+  * Arsipkan data history yang lebih tua dari $months ke tabel archive.
+  * Default 120 bulan = 10 tahun.
+  */
+  public function archiveOldData(int $months = 120): int
+  {
+    $cutoffDate = Carbon::now()->subMonths($months);
+    $oldRecords = GoldPriceHistory::where('price_date', '<', $cutoffDate)->get();
+
+    if ($oldRecords->isEmpty()) {
+      return 0;
+    }
+
+    // Pindahkan ke archive
+    foreach ($oldRecords->chunk(1000) as $chunk) {
+      $archiveData = $chunk->map(function ($record) {
+        return $record->toArray();
+      })->toArray();
+      GoldPriceArchive::insert($archiveData);
+    }
+
+    // Hapus dari history
+    $deleted = GoldPriceHistory::where('price_date', '<', $cutoffDate)->delete();
+
+    Log::info("GoldPrice archive: {$deleted} records moved to archive.");
+    return $deleted;
   }
 }
