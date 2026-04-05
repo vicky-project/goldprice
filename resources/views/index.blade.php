@@ -206,13 +206,13 @@
       }
       const latestData = await fetchLatest(currency);
       renderTable(latestData);
-      let targerCurrency = currency;
-      if (!targerCurrency && latestData.length) {
-        targerCurrency = latestData[0].currency;
-        document.getElementById('currency-select').value = targerCurrency;
+      let targetCurrency = currency;
+      if (!targetCurrency && latestData.length) {
+        targetCurrency = latestData[0].currency;
+        document.getElementById('currency-select').value = targetCurrency;
       }
       if (targerCurrency) {
-        const history = await fetchHistory(targerCurrency, hours, days);
+        const history = await fetchHistory(targetCurrency, hours, days);
         renderChart(history, 'gram');
       }
     } catch (err) {
