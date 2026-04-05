@@ -213,14 +213,15 @@
     const loadingTable = document.getElementById('loading-table');
     const loadingChart = document.getElementById('loading-chart');
     const priceChart = document.getElementById('price-chart');
-    try {
-      loadingTable.classList.remove('d-none');
-      loadingChart.classList.remove('d-none');
-      priceChart.style.opacity = "0.5";
-      refreshBtn.disabled = true;
-      currencySelect.disabled = true;
-      rangeSelect.disabled = true;
 
+    loadingTable.classList.remove('d-none');
+    loadingChart.classList.remove('d-none');
+    priceChart.style.opacity = "0.5";
+    refreshBtn.disabled = true;
+    currencySelect.disabled = true;
+    rangeSelect.disabled = true;
+
+    try {
       const currency = document.getElementById('currency-select').value;
       const rangeValue = parseInt(document.getElementById('range-select').value, 10);
       let hours = null,
