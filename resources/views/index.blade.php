@@ -119,12 +119,12 @@
   function renderChart(history, unit = 'gram') {
     const ctx = document.getElementById('price-chart').getContext('2d');
     if (chartInstance) chartInstance.destroy();
+    alert(JSON.stringify(history))
 
     if (!history.length) {
       document.getElementById('price-chart').style.display = 'none';
       return;
     }
-    alert(JSON.stringify(history))
     document.getElementById('price-chart').style.display = 'block';
 
     const labels = history.map(h => {
