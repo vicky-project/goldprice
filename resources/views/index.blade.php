@@ -48,7 +48,12 @@
     <div class="col-md-6">
       <h4>Tabel Harga Terkini</h4>
       <div id="loading-table" class="text-center d-none">
-        Loading...
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loding...</span>
+        </div>
+        <p>
+          Memuat data...
+        </p>
       </div>
       <div class="table-responsive">
         <table class="table table-bordered" id="price-table">
@@ -61,7 +66,12 @@
     </div>
     <div class="col-md-6">
       <h4>Chart History</h4>
-      <canvas id="price-chart" width="400" height="200"></canvas>
+      <div style="position: relative;">
+        <canvas id="price-chart" width="400" height="200"></canvas>
+        <div id="loading-chart" class="text-center d-none" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+          <div class="spinner-border text-primary"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -69,6 +79,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   let chartInstance = null;
+  let isLoading = false;
   const apiBase = '{{ secure_url(config("app.url")) }}/api/gold-price';
 
   async function fetchCurrencies() {
@@ -192,9 +203,24 @@
   }
 
   async function loadAll() {
-    const loading = document.getElementById('loading-table');
-    loading.classList.remove('d-none');
+    if (isLoading) return;
+    isLoading = true;
+
+    const refreshBtn = document.getElementById('refresh-btn');
+    const currencySelect = document.getElementById('currency-select');
+    const rangeSelect = document.getElementById('range-select');
+
+    const loadingTable = document.getElementById('loading-table');
+    const loadingChart = document.getElementById('loading-chart');
+    const priceChart = document.getElementById('price-chart');
     try {
+      loadingTable.classList.remove('d-none');
+      loadingChart.classList.remove('d-none');
+      priceChart.style.opacity = "0.5";
+      refreshBtn.disabled = true;
+      currencySelect.disabled = true;
+      rangeSelect.disabled = true;
+
       const currency = document.getElementById('currency-select').value;
       const rangeValue = parseInt(document.getElementById('range-select').value, 10);
       let hours = null,
@@ -223,7 +249,13 @@
     } catch (err) {
       console.error(err);
     } finally {
-      loading.classList.add('d-none');
+      loadingTable.classList.add('d-none');
+      loadingChart.classList.add('d-none');
+      priceChart.style.opacity = "1";
+      refreshBtn.disabled = false;
+      currencySelect.disabled = false;
+      rangeSelect.disabled = false;
+      isLoading = false;
     }
   }
 
