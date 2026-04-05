@@ -222,8 +222,8 @@
     rangeSelect.disabled = true;
 
     try {
-      const currency = document.getElementById('currency-select').value;
-      const rangeValue = parseInt(document.getElementById('range-select').value, 10);
+      const currency = currencySelect.value;
+      const rangeValue = parseInt(rangeSelect.value, 10);
       let hours = null,
       days = 30;
       if (rangeValue <= 24) {
@@ -236,7 +236,7 @@
       let targetCurrency = currency;
       if (!targetCurrency && latestData.length) {
         targetCurrency = latestData[0].currency;
-        document.getElementById('currency-select').value = targetCurrency;
+        currencySelect.value = targetCurrency;
       }
       if (targetCurrency) {
         const history = await fetchHistory(targetCurrency, hours, days);
@@ -244,7 +244,7 @@
           renderChart(history, 'gram');
         } else {
           alert("No history data found for: " + targetCurrency);
-          document.getElementById('price-chart').style.display = 'none';
+          priceChart.style.display = 'none';
         }
       }
     } catch (err) {
