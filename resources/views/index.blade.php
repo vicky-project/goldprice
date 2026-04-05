@@ -20,6 +20,10 @@
         <div class="card-body">
           <div class="row mb-3">
             <div class="col-md-3">
+              <label>Cari Mata Uang</label>
+              <input type="text" id="currency-search" class="form-control" placeholder="Ketik nama atau kode mata uang...">
+            </div>
+            <div class="col-md-3">
               <label>Mata Uang</label>
               <select id="currency-select" class="form-select">
                 <option value="">-- Pilih Mata Uang --</option>
@@ -434,6 +438,36 @@
     return currencyNames[code] || code;
   }
 
+  // Jalankan setelah opsi select terisi (di dalam fetchCurrencies)
+  function initCurrencySearch() {
+    const searchInput = document.getElementById('currency-search');
+    const select = document.getElementById('currency-select');
+
+    searchInput.addEventListener('input', function() {
+    const keyword = this.value.toLowerCase().trim();
+    const options = select.options;
+    let hasVisible = false;
+
+    for (let i = 0; i < options.length; i++) {
+    const option = options[i];
+    const text = option.textContent.toLowerCase();
+    // Tampilkan jika kosong atau teks mengandung keyword
+    if (keyword === '' || text.includes(keyword)) {
+    option.style.display = '';
+    hasVisible = true;
+    } else {
+    option.style.display = 'none';
+    }
+    }
+
+    // Opsional: jika tidak ada yang cocok, tampilkan pesan
+    if (!hasVisible && keyword !== '') {
+    // Bisa tambahkan opsi pesan sementara (tidak disarankan)
+    console.log('Tidak ada mata uang yang cocok');
+    }
+    });
+  }
+
   async function fetchCurrencies() {
     const res = await fetch(`${apiBase}/currencies`);
     const data = await res.json();
@@ -445,6 +479,8 @@
     opt.textContent = `${getCurrencyName(curr)} (${curr})`;
     select.appendChild(opt);
     });
+
+    initCurrencySearch();
   }
 
   async function fetchLatest(currency = '') {
