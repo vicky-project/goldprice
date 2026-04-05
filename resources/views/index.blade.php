@@ -31,7 +31,7 @@
                 <option value="6">6 jam terakhir</option>
                 <option value="24">24 jam terakhir</option>
                 <option value="7" selected>7 hari</option>
-                <option value="30" selected>30 hari</option>
+                <option value="30">30 hari</option>
                 <option value="90">90 hari</option>
               </select>
             </div>
