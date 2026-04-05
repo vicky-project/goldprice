@@ -227,7 +227,7 @@
   document.getElementById('range-select').addEventListener('change', loadAll);
 
   try {
-    fetchCurrencies().then(() => loadAll());
+    fetchCurrencies().then(() => loadAll()).catch(err => alert(err.message));
   }
   catch(e) {
     alert(e.message)
