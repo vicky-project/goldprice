@@ -124,6 +124,7 @@
       document.getElementById('price-chart').style.display = 'none';
       return;
     }
+    alert(JSON.stringify(history))
     document.getElementById('price-chart').style.display = 'block';
 
     const labels = history.map(h => {
