@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container py-4">
-  {{-- Header dengan breadcrumb --}}
+  {{-- Header --}}
   <div class="row mb-4">
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -13,7 +13,6 @@
           <i class="bi bi-gem2 me-2 text-warning"></i>Harga Emas Dunia
         </h4>
         <div></div>
-        {{-- spacer --}}
       </div>
     </div>
   </div>
@@ -22,7 +21,7 @@
   <div class="row mb-4">
     <div class="col-12">
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-white border-0 py-3 px-4">
+        <div class="card-header border-0 py-3 px-4">
           <h5 class="mb-0 fw-semibold"><i class="bi bi-funnel-fill me-2 text-primary"></i>Filter & Pencarian</h5>
         </div>
         <div class="card-body px-4 pb-4">
@@ -30,7 +29,7 @@
             <div class="col-md-3">
               <label class="form-label fw-semibold">Cari Mata Uang</label>
               <div class="input-group shadow-sm">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                <span class="input-group-text border-end-0"><i class="bi bi-search"></i></span>
                 <input type="text" id="currency-search" class="form-control border-start-0 ps-0" placeholder="Nama / kode ...">
                 <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Hapus pencarian">
                   <i class="bi bi-x-lg"></i>
@@ -66,10 +65,9 @@
 
   {{-- Konten Utama: Tabel & Chart --}}
   <div class="row g-4">
-    {{-- Tabel Harga Terkini --}}
     <div class="col-lg-6">
       <div class="card border-0 shadow-sm rounded-4 h-100">
-        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+        <div class="card-header border-0 pt-4 px-4 pb-0">
           <h5 class="mb-0 fw-semibold"><i class="bi bi-table me-2 text-success"></i>Harga Terkini</h5>
           <hr class="my-2">
         </div>
@@ -100,10 +98,9 @@
       </div>
     </div>
 
-    {{-- Chart History --}}
     <div class="col-lg-6">
       <div class="card border-0 shadow-sm rounded-4 h-100">
-        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+        <div class="card-header border-0 pt-4 px-4 pb-0">
           <h5 class="mb-0 fw-semibold"><i class="bi bi-graph-up me-2 text-info"></i>Grafik Pergerakan</h5>
           <hr class="my-2">
         </div>
@@ -129,7 +126,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  // ======================== DATA MAPPING (sama seperti kode Anda, dipersingkat) ========================
+  // ======================== MAPPING MATA UANG (sama seperti sebelumnya, dipadatkan) ========================
   const fiatCurrencies = {
     'AED': 'UAE Dirham',
     'AFN': 'Afghani',
@@ -563,18 +560,8 @@
     chartInstance = new Chart(canvas, {
       type: 'line',
       data: {
-        labels: labels,
-        datasets: [{
-          label: `Harga per ${unit}`,
-          data: prices,
-          borderColor: '#f1c40f',
-          backgroundColor: 'rgba(241,196,15,0.05)',
-          borderWidth: 2,
-          pointRadius: 2,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#e67e22',
-          tension: 0.2,
-          fill: true
+        labels, datasets: [{
+          label: `Harga per ${unit}`, data: prices, borderColor: '#f1c40f', backgroundColor: 'rgba(241,196,15,0.05)', borderWidth: 2, pointRadius: 2, pointHoverRadius: 6, pointBackgroundColor: '#e67e22', tension: 0.2, fill: true
         }]
       },
       options: {
@@ -588,166 +575,158 @@
           },
           legend: {
             position: 'top', labels: {
-              boxWidth: 12
-            }
-          }
-        },
-        scales: {
-          x: {
-            title: {
-              display: true, text: 'Waktu', font: {
-                size: 11
+              boxWidth: 12, color: 'var(--tg-theme-text-color, #333)' } }
+              },
+              scales: {
+              x: {
+              title: { display: true, text: 'Waktu', font: { size: 11 }, color: 'var(--tg-theme-hint-color, #666)' },
+              ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 8, color: 'var(--tg-theme-text-color, #333)' }
+              },
+              y: {
+              title: { display: true, text: `Harga (${unit})`, font: { size: 11 }, color: 'var(--tg-theme-hint-color, #666)' },
+              beginAtZero: false,
+              grid: { color: 'rgba(128,128,128,0.1)' },
+              ticks: {
+              color: 'var(--tg-theme-text-color, #333)',
+              callback: function(value) {
+              // Format angka pendek (ribuan/jutaan)
+              if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
+              if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K';
+              return value.toLocaleString();
+              },
+              maxTicksLimit: 6,
+              autoSkip: true
               }
-            }, ticks: {
-              maxRotation: 45, autoSkip: true, maxTicksLimit: 8
-            }
-          },
-          y: {
-            title: {
-              display: true, text: `Harga (${unit})`, font: {
-                size: 11
               }
-            }, beginAtZero: false, grid: {
-              color: '#e9ecef'
+              }
+              }
+              });
             }
-          }
-        }
-      }
-    });
-  }
 
-  async function loadAll() {
-    if (isLoading) return;
-    isLoading = true;
-    const refreshBtn = document.getElementById('refresh-btn');
-    const currencySelect = document.getElementById('currency-select');
-    const rangeSelect = document.getElementById('range-select');
-    const loadingTable = document.getElementById('loading-table');
-    const loadingChart = document.getElementById('loading-chart');
-    const priceChart = document.getElementById('price-chart');
-    const chartEmpty = document.getElementById('chart-empty-message');
+            async function loadAll() {
+              if (isLoading) return;
+              isLoading = true;
+              const refreshBtn = document.getElementById('refresh-btn');
+              const currencySelect = document.getElementById('currency-select');
+              const rangeSelect = document.getElementById('range-select');
+              const loadingTable = document.getElementById('loading-table');
+              const loadingChart = document.getElementById('loading-chart');
+              const priceChart = document.getElementById('price-chart');
+              const chartEmpty = document.getElementById('chart-empty-message');
 
-    loadingTable.classList.remove('d-none');
-    loadingChart.classList.remove('d-none');
-    priceChart.style.display = 'none';
-    chartEmpty.classList.add('d-none');
-    refreshBtn.disabled = true;
-    currencySelect.disabled = true;
-    rangeSelect.disabled = true;
+              loadingTable.classList.remove('d-none');
+              loadingChart.classList.remove('d-none');
+              priceChart.style.display = 'none';
+              chartEmpty.classList.add('d-none');
+              refreshBtn.disabled = true;
+              currencySelect.disabled = true;
+              rangeSelect.disabled = true;
 
-    try {
-      const currency = currencySelect.value;
-      const rangeValue = parseInt(rangeSelect.value, 10);
-      let hours = null,
-      days = 30;
-      if (rangeValue <= 24) hours = rangeValue;
-      else days = rangeValue;
+              try {
+                const currency = currencySelect.value;
+                const rangeValue = parseInt(rangeSelect.value, 10);
+                let hours = null,
+                days = 30;
+                if (rangeValue <= 24) hours = rangeValue;
+                else days = rangeValue;
 
-      const latestData = await fetchLatest(currency);
-      renderTable(latestData);
-      let targetCurrency = currency;
-      if (!targetCurrency && latestData.length) {
-        targetCurrency = latestData[0].currency;
-        currencySelect.value = targetCurrency;
-      }
-      if (targetCurrency) {
-        const history = await fetchHistory(targetCurrency, hours, days);
-        renderChart(history, 'gram');
-      } else {
-        renderChart([], 'gram');
-      }
-    } catch (err) {
-      console.error(err);
-      document.getElementById('price-table-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal memuat data. Coba refresh.</td></tr>';
-    } finally {
-      loadingTable.classList.add('d-none');
-      loadingChart.classList.add('d-none');
-      refreshBtn.disabled = false;
-      currencySelect.disabled = false;
-      rangeSelect.disabled = false;
-      isLoading = false;
-    }
-  }
+                const latestData = await fetchLatest(currency);
+                renderTable(latestData);
+                let targetCurrency = currency;
+                if (!targetCurrency && latestData.length) {
+                  targetCurrency = latestData[0].currency;
+                  currencySelect.value = targetCurrency;
+                }
+                if (targetCurrency) {
+                  const history = await fetchHistory(targetCurrency, hours, days);
+                  renderChart(history, 'gram');
+                } else {
+                  renderChart([], 'gram');
+                }
+              } catch (err) {
+                console.error(err);
+                document.getElementById('price-table-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal memuat data. Coba refresh.</td></tr>';
+              } finally {
+                loadingTable.classList.add('d-none');
+                loadingChart.classList.add('d-none');
+                refreshBtn.disabled = false;
+                currencySelect.disabled = false;
+                rangeSelect.disabled = false;
+                isLoading = false;
+              }
+            }
 
-  document.getElementById('refresh-btn').addEventListener('click', loadAll);
-  document.getElementById('currency-select').addEventListener('change', loadAll);
-  document.getElementById('range-select').addEventListener('change', loadAll);
-  document.addEventListener('DOMContentLoaded', () => fetchCurrencies().then(loadAll).catch(err => alert(err.message)));
-</script>
-@endsection
+            document.getElementById('refresh-btn').addEventListener('click', loadAll);
+            document.getElementById('currency-select').addEventListener('change', loadAll);
+            document.getElementById('range-select').addEventListener('change', loadAll);
+            document.addEventListener('DOMContentLoaded', () => fetchCurrencies().then(loadAll).catch(err => alert(err.message)));
+          </script>
+          @endsection
 
-@push('styles')
-<style>
-:root {
-  --border-radius-card: 1.25rem;
-  --shadow-sm: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
-  --shadow-md: 0 0.5rem 1rem rgba(0,0,0,0.05);
-}
-  body {
-    background: var(--tg-theme-bg-color, #f8f9fa);
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    }
-    .text-gradient {
-    background: linear-gradient(135deg, #f9a825, #f57c00);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    display: inline-block;
-    }
-    .card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md) !important;
-    }
-    .table-hover tbody tr:hover {
-    background-color: rgba(241,196,15,0.05);
-    transition: background 0.2s;
-    }
-    .btn-primary {
-    background: linear-gradient(135deg, #f9a825, #f57c00);
-    border: none;
-    transition: all 0.2s;
-    }
-    .btn-primary:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.05);
-    box-shadow: 0 4px 12px rgba(245,124,0,0.3);
-    }
-    .btn-outline-secondary {
-    border-color: #ced4da;
-    color: #6c757d;
-    }
-    .btn-outline-secondary:hover {
-    background-color: #e9ecef;
-    border-color: #adb5bd;
-    color: #495057;
-    }
-    .form-select, .form-control {
-    border-radius: 0.75rem;
-    border: 1px solid #dee2e6;
-    transition: border 0.2s, box-shadow 0.2s;
-    }
-    .form-select:focus, .form-control:focus {
-    border-color: #f9a825;
-    box-shadow: 0 0 0 0.2rem rgba(249,168,37,0.25);
-    }
-    .input-group-text {
-    background-color: white;
-    border-radius: 0.75rem 0 0 0.75rem;
-    }
-    .table th {
-    font-weight: 600;
-    border-top: none;
-    }
-    .table td {
-    vertical-align: middle;
-    }
-    @media (max-width: 768px) {
-    .container { padding-left: 1rem; padding-right: 1rem; }
-    .card-body { padding: 1rem; }
-    .table td, .table th { font-size: 0.85rem; }
-    }
-    </style>
-    @endpush
+          @push('styles')
+          <style>
+            /* Tema Telegram penuh */
+            body {
+              background-color: var(--tg-theme-bg-color, #f8f9fa);
+              color: var(--tg-theme-text-color, #212529);
+              font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+              }
+              .card {
+              background-color: var(--tg-theme-secondary-bg-color, #fff);
+              color: var(--tg-theme-text-color, #212529);
+              border: none;
+              border-radius: 1.25rem;
+              transition: transform 0.2s ease, box-shadow 0.2s ease;
+              }
+              .card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05) !important;
+              }
+              .card-header {
+              background-color: var(--tg-theme-secondary-bg-color, #fff);
+              color: var(--tg-theme-text-color, #212529);
+              border-bottom: 1px solid var(--tg-theme-section-separator-color, #dee2e6);
+              }
+              .table {
+              color: var(--tg-theme-text-color, #212529);
+              }
+              .table thead th {
+              background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
+              border-color: var(--tg-theme-section-separator-color, #dee2e6);
+              }
+              .table-hover tbody tr:hover {
+              background-color: rgba(241,196,15,0.05);
+              }
+              .form-select, .form-control {
+              background-color: var(--tg-theme-bg-color, #fff);
+              color: var(--tg-theme-text-color, #212529);
+              border-color: var(--tg-theme-section-separator-color, #dee2e6);
+              }
+              .input-group-text {
+              background-color: var(--tg-theme-bg-color, #fff);
+              border-color: var(--tg-theme-section-separator-color, #dee2e6);
+              color: var(--tg-theme-hint-color, #6c757d);
+              }
+              .btn-outline-secondary {
+              border-color: var(--tg-theme-section-separator-color, #ced4da);
+              color: var(--tg-theme-hint-color, #6c757d);
+              }
+              .btn-outline-secondary:hover {
+              background-color: var(--tg-theme-secondary-bg-color, #e9ecef);
+              border-color: var(--tg-theme-hint-color, #adb5bd);
+              color: var(--tg-theme-text-color, #495057);
+              }
+              .text-gradient {
+              background: linear-gradient(135deg, #f9a825, #f57c00);
+              -webkit-background-clip: text;
+              background-clip: text;
+              color: transparent;
+              display: inline-block;
+              }
+              @media (max-width: 768px) {
+              .container { padding-left: 1rem; padding-right: 1rem; }
+              .card-body { padding: 1rem; }
+              .table td, .table th { font-size: 0.85rem; }
+              }
+              </style>
+              @endpush
