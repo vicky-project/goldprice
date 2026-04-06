@@ -79,13 +79,14 @@
             </p>
           </div>
           <div class="table-responsive">
-            <table class="table table-hover align-middle" id="price-table">
+            <table class="table align-middle" id="price-table">
               <thead>
                 <tr>
                   <th>Mata Uang</th>
                   <th class="text-end">Ounce (oz)</th>
                   <th class="text-end">Gram (g)</th>
                   <th class="text-end">Tola</th>
+                  <th class="text-end">Perubahan (Gram)</th>
                   <th>Update</th>
                 </tr>
               </thead>
@@ -508,6 +509,25 @@
     });
   }
 
+  async function fetchChangePercent(currency, currentGram) {
+    try {
+      const url = `${apiBase}/history?currency=${currency}&days=7`; // ambil history 7 hari
+      const res = await fetch(url);
+      const history = await res.json();
+      if (history.length < 2) return null; // tidak cukup data
+      // urutan history dari lama ke baru (ascending), ambil dua terbaru
+      const lastTwo = history.slice(-2);
+      const prevGram = parseFloat(lastTwo[0].gram);
+      const currGram = parseFloat(currentGram);
+      if (isNaN(prevGram) || isNaN(currGram) || prevGram === 0) return null;
+      const percent = ((currGram - prevGram) / prevGram) * 100;
+      return percent;
+    } catch (err) {
+      console.error(`Error fetching change for ${currency}:`, err);
+      return null;
+    }
+  }
+
   async function fetchCurrencies() {
     const res = await fetch(`${apiBase}/currencies`);
     allCurrencies = await res.json();
@@ -529,10 +549,10 @@
     return res.json();
   }
 
-  function renderTable(data) {
+  function renderTableWithLoading(data) {
     const tbody = document.getElementById('price-table-body');
     if (!data.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-database-slash"></i> Tidak ada data</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="bi bi-database-slash"></i> Tidak ada data</td></tr>';
       return;
     }
     tbody.innerHTML = data.map(item => `
@@ -542,8 +562,38 @@
     <td class="text-end">${Number(item.gram).toLocaleString()}</td>
     <td class="text-end">${Number(item.tola).toLocaleString()}</td>
     <td class="text-nowrap small">${new Date(item.price_date).toLocaleString()}</td>
+    <td class="text-end"><div class="spinner-border spinner-border-sm text-secondary" role="status"><span class="visually-hidden">Loading...</span></div></td>
     </tr>
     `).join('');
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('price-table-body');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="bi bi-database-slash"></i> Tidak ada data</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(item => {
+    let changeHtml = '<span class="text-muted">-</span>';
+    if (item.change_percent !== null && !isNaN(item.change_percent)) {
+    const percent = item.change_percent;
+    const isPositive = percent > 0;
+    const isZero = percent === 0;
+    const colorClass = isPositive ? 'text-success' : (isZero ? 'text-muted' : 'text-danger');
+    const sign = isPositive ? '+' : '';
+    changeHtml = `<span class="${colorClass} fw-semibold">${sign}${percent.toFixed(2)}%</span>`;
+    }
+    return `
+    <tr>
+    <td class="fw-semibold">${getCurrencyName(item.currency)} <span class="text-muted small">(${item.currency})</span></td>
+    <td class="text-end">${Number(item.ounce).toLocaleString()}</td>
+    <td class="text-end">${Number(item.gram).toLocaleString()}</td>
+    <td class="text-end">${Number(item.tola).toLocaleString()}</td>
+    <td class="text-end">${changeHtml}</td>
+    <td class="text-nowrap small">${new Date(item.price_date).toLocaleString()}</td>
+    </tr>
+    `;
+    }).join('');
   }
 
   // Ambil warna dari tema Telegram
@@ -688,7 +738,25 @@
       else days = rangeValue;
 
       const latestData = await fetchLatest(currency);
-      renderTable(latestData);
+
+      // Tampilkan tabel sementara dengan loading indicator di kolom perubahan
+      renderTableWithLoading(latestData);
+
+      // Hitung persentase perubahan untuk setiap mata uang secara paralel
+      const changePromises = latestData.map(async (item) => {
+      const percent = await fetchChangePercent(item.currency, item.gram);
+      return { currency: item.currency, percent };
+      });
+      const changes = await Promise.all(changePromises);
+      // Gabungkan data perubahan ke latestData
+      const enrichedData = latestData.map(item => {
+      const change = changes.find(c => c.currency === item.currency);
+      return { ...item, change_percent: change ? change.percent : null };
+      });
+
+      // Render ulang tabel dengan data perubahan
+      renderTable(enrichedData);
+
       let targetCurrency = currency;
       if (!targetCurrency && latestData.length) {
         targetCurrency = latestData[0].currency;
@@ -702,7 +770,7 @@
       }
     } catch (err) {
       console.error(err);
-      document.getElementById('price-table-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal memuat data. Coba refresh.</td></tr>';
+      document.getElementById('price-table-body').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Gagal memuat data. Coba refresh.</td></tr>';
     } finally {
       loadingTable.classList.add('d-none');
       loadingChart.classList.add('d-none');
