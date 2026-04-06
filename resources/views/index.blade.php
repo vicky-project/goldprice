@@ -784,10 +784,6 @@
     overflow-x: auto;
     width: 100%;
     }
-    #price-chart {
-    min-width: 600px;
-    height: 350px;
-    }
     @media (max-width: 768px) {
     .container { padding-left: 1rem; padding-right: 1rem; }
     .card-body { padding: 1rem; }
