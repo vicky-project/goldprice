@@ -111,7 +111,10 @@
               Memuat grafik ...
             </p>
           </div>
-          <canvas id="price-chart" width="800" height="250" style="display: none;"></canvas>
+          <!-- Di bagian chart, ganti dengan wrapper -->
+          <div class="chart-wrapper" style="overflow-x: auto; width: 100%;">
+            <canvas id="price-chart" style="min-width: 600px; height: 350px; display: none;"></canvas>
+          </div>
           <div id="chart-empty-message" class="text-center py-5 text-muted d-none">
             <i class="bi bi-bar-chart-steps fs-1"></i>
             <p class="mt-2">
@@ -590,7 +593,7 @@
       },
       options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
         plugins: {
           tooltip: {
             callbacks: {
@@ -623,7 +626,7 @@
               color: colors.textColor,
               maxRotation: 45,
               autoSkip: true,
-              maxTicksLimit: 8
+              maxTicksLimit: 12
             },
             grid: {
               color: colors.separatorColor + '40' // transparan
@@ -777,6 +780,14 @@
     background-clip: text;
     color: transparent;
     display: inline-block;
+    }
+    .chart-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    }
+    #price-chart {
+    min-width: 600px;
+    height: 350px;
     }
     @media (max-width: 768px) {
     .container { padding-left: 1rem; padding-right: 1rem; }
