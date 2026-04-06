@@ -848,6 +848,9 @@
     color: transparent;
     display: inline-block;
     }
+    .text-muted {
+    color: var(--tg-theme-hint-color) !important;
+    }
     .chart-wrapper {
     overflow-x: auto;
     width: 100%;
