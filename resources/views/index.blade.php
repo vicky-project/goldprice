@@ -80,7 +80,7 @@
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle" id="price-table">
-              <thead class="table-light">
+              <thead>
                 <tr>
                   <th>Mata Uang</th>
                   <th class="text-end">Ounce (oz)</th>
