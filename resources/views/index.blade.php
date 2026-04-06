@@ -111,7 +111,7 @@
               Memuat grafik ...
             </p>
           </div>
-          <canvas id="price-chart" width="400" height="250" style="display: none;"></canvas>
+          <canvas id="price-chart" width="800" height="250" style="display: none;"></canvas>
           <div id="chart-empty-message" class="text-center py-5 text-muted d-none">
             <i class="bi bi-bar-chart-steps fs-1"></i>
             <p class="mt-2">
