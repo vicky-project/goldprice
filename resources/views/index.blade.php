@@ -111,10 +111,7 @@
               Memuat grafik ...
             </p>
           </div>
-          <!-- Di bagian chart, ganti dengan wrapper -->
-          <div class="chart-wrapper" style="overflow-x: auto; width: 100%;">
-            <canvas id="price-chart" style="min-width: 600px; height: 350px; display: none;"></canvas>
-          </div>
+          <canvas id="price-chart" width="400" height="250" style="display: none;"></canvas>
           <div id="chart-empty-message" class="text-center py-5 text-muted d-none">
             <i class="bi bi-bar-chart-steps fs-1"></i>
             <p class="mt-2">
@@ -126,7 +123,9 @@
     </div>
   </div>
 </div>
+@endsection
 
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
   // ======================== MAPPING MATA UANG (sama seperti sebelumnya, dipadatkan) ========================
@@ -593,7 +592,7 @@
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
+        maintainAspectRatio: true,
         plugins: {
           tooltip: {
             callbacks: {
@@ -626,7 +625,7 @@
               color: colors.textColor,
               maxRotation: 45,
               autoSkip: true,
-              maxTicksLimit: 12
+              maxTicksLimit: 8
             },
             grid: {
               color: colors.separatorColor + '40' // transparan
@@ -719,7 +718,7 @@
   document.getElementById('range-select').addEventListener('change', loadAll);
   document.addEventListener('DOMContentLoaded', () => fetchCurrencies().then(loadAll).catch(err => alert(err.message)));
 </script>
-@endsection
+@endpush
 
 @push('styles')
 <style>
