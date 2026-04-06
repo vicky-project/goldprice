@@ -561,8 +561,8 @@
     <td class="text-end">${Number(item.ounce).toLocaleString()}</td>
     <td class="text-end">${Number(item.gram).toLocaleString()}</td>
     <td class="text-end">${Number(item.tola).toLocaleString()}</td>
-    <td class="text-nowrap small">${new Date(item.price_date).toLocaleString()}</td>
     <td class="text-end"><div class="spinner-border spinner-border-sm text-secondary" role="status"><span class="visually-hidden">Loading...</span></div></td>
+    <td class="text-nowrap small">${new Date(item.price_date).toLocaleString()}</td>
     </tr>
     `).join('');
   }
