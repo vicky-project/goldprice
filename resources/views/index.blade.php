@@ -544,6 +544,17 @@
     `).join('');
   }
 
+  // Ambil warna dari tema Telegram
+  function getTelegramColors() {
+    const bodyStyle = getComputedStyle(document.body);
+    return {
+      textColor: bodyStyle.getPropertyValue('--tg-theme-text-color').trim() || '#212529',
+      hintColor: bodyStyle.getPropertyValue('--tg-theme-hint-color').trim() || '#6c757d',
+      separatorColor: bodyStyle.getPropertyValue('--tg-theme-section-separator-color').trim() || '#dee2e6',
+      bgColor: bodyStyle.getPropertyValue('--tg-theme-bg-color').trim() || '#ffffff'
+    };
+  }
+
   function renderChart(history, unit = 'gram') {
     const canvas = document.getElementById('price-chart');
     const emptyMsg = document.getElementById('chart-empty-message');
@@ -555,13 +566,26 @@
     }
     canvas.style.display = 'block';
     emptyMsg.classList.add('d-none');
+
+    const colors = getTelegramColors();
     const labels = history.map(h => new Date(h.price_date).toLocaleString());
     const prices = history.map(h => parseFloat(h[unit]));
+
     chartInstance = new Chart(canvas, {
       type: 'line',
       data: {
-        labels, datasets: [{
-          label: `Harga per ${unit}`, data: prices, borderColor: '#f1c40f', backgroundColor: 'rgba(241,196,15,0.05)', borderWidth: 2, pointRadius: 2, pointHoverRadius: 6, pointBackgroundColor: '#e67e22', tension: 0.2, fill: true
+        labels: labels,
+        datasets: [{
+          label: `Harga per ${unit}`,
+          data: prices,
+          borderColor: '#f1c40f',
+          backgroundColor: 'rgba(241,196,15,0.05)',
+          borderWidth: 2,
+          pointRadius: 2,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#e67e22',
+          tension: 0.2,
+          fill: true
         }]
       },
       options: {
@@ -571,162 +595,193 @@
           tooltip: {
             callbacks: {
               label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString()}`
-            }
+            },
+            bodyColor: colors.textColor,
+            titleColor: colors.textColor,
+            backgroundColor: colors.bgColor,
+            borderColor: colors.separatorColor,
+            borderWidth: 1
           },
           legend: {
-            position: 'top', labels: {
-              boxWidth: 12, color: 'var(--tg-theme-text-color, #333)' } }
-              },
-              scales: {
-              x: {
-              title: { display: true, text: 'Waktu', font: { size: 11 }, color: 'var(--tg-theme-hint-color, #666)' },
-              ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 8, color: 'var(--tg-theme-text-color, #333)' }
-              },
-              y: {
-              title: { display: true, text: `Harga (${unit})`, font: { size: 11 }, color: 'var(--tg-theme-hint-color, #666)' },
-              beginAtZero: false,
-              grid: { color: 'rgba(128,128,128,0.1)' },
-              ticks: {
-              color: 'var(--tg-theme-text-color, #333)',
+            labels: {
+              color: colors.textColor,
+              boxWidth: 12
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Waktu',
+              color: colors.hintColor,
+              font: {
+                size: 11
+              }
+            },
+            ticks: {
+              color: colors.textColor,
+              maxRotation: 45,
+              autoSkip: true,
+              maxTicksLimit: 8
+            },
+            grid: {
+              color: colors.separatorColor + '40' // transparan
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: `Harga (${unit})`,
+              color: colors.hintColor,
+              font: {
+                size: 11
+              }
+            },
+            beginAtZero: false,
+            ticks: {
+              color: colors.textColor,
               callback: function(value) {
-              // Format angka pendek (ribuan/jutaan)
-              if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-              if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K';
-              return value.toLocaleString();
+                if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
+                if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K';
+                return value.toLocaleString();
               },
               maxTicksLimit: 6,
               autoSkip: true
-              }
-              }
-              }
-              }
-              });
+            },
+            grid: {
+              color: colors.separatorColor + '40'
             }
+          }
+        }
+      }
+    });
+  }
 
-            async function loadAll() {
-              if (isLoading) return;
-              isLoading = true;
-              const refreshBtn = document.getElementById('refresh-btn');
-              const currencySelect = document.getElementById('currency-select');
-              const rangeSelect = document.getElementById('range-select');
-              const loadingTable = document.getElementById('loading-table');
-              const loadingChart = document.getElementById('loading-chart');
-              const priceChart = document.getElementById('price-chart');
-              const chartEmpty = document.getElementById('chart-empty-message');
+  async function loadAll() {
+    if (isLoading) return;
+    isLoading = true;
+    const refreshBtn = document.getElementById('refresh-btn');
+    const currencySelect = document.getElementById('currency-select');
+    const rangeSelect = document.getElementById('range-select');
+    const loadingTable = document.getElementById('loading-table');
+    const loadingChart = document.getElementById('loading-chart');
+    const priceChart = document.getElementById('price-chart');
+    const chartEmpty = document.getElementById('chart-empty-message');
 
-              loadingTable.classList.remove('d-none');
-              loadingChart.classList.remove('d-none');
-              priceChart.style.display = 'none';
-              chartEmpty.classList.add('d-none');
-              refreshBtn.disabled = true;
-              currencySelect.disabled = true;
-              rangeSelect.disabled = true;
+    loadingTable.classList.remove('d-none');
+    loadingChart.classList.remove('d-none');
+    priceChart.style.display = 'none';
+    chartEmpty.classList.add('d-none');
+    refreshBtn.disabled = true;
+    currencySelect.disabled = true;
+    rangeSelect.disabled = true;
 
-              try {
-                const currency = currencySelect.value;
-                const rangeValue = parseInt(rangeSelect.value, 10);
-                let hours = null,
-                days = 30;
-                if (rangeValue <= 24) hours = rangeValue;
-                else days = rangeValue;
+    try {
+      const currency = currencySelect.value;
+      const rangeValue = parseInt(rangeSelect.value, 10);
+      let hours = null,
+      days = 30;
+      if (rangeValue <= 24) hours = rangeValue;
+      else days = rangeValue;
 
-                const latestData = await fetchLatest(currency);
-                renderTable(latestData);
-                let targetCurrency = currency;
-                if (!targetCurrency && latestData.length) {
-                  targetCurrency = latestData[0].currency;
-                  currencySelect.value = targetCurrency;
-                }
-                if (targetCurrency) {
-                  const history = await fetchHistory(targetCurrency, hours, days);
-                  renderChart(history, 'gram');
-                } else {
-                  renderChart([], 'gram');
-                }
-              } catch (err) {
-                console.error(err);
-                document.getElementById('price-table-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal memuat data. Coba refresh.</td></tr>';
-              } finally {
-                loadingTable.classList.add('d-none');
-                loadingChart.classList.add('d-none');
-                refreshBtn.disabled = false;
-                currencySelect.disabled = false;
-                rangeSelect.disabled = false;
-                isLoading = false;
-              }
-            }
+      const latestData = await fetchLatest(currency);
+      renderTable(latestData);
+      let targetCurrency = currency;
+      if (!targetCurrency && latestData.length) {
+        targetCurrency = latestData[0].currency;
+        currencySelect.value = targetCurrency;
+      }
+      if (targetCurrency) {
+        const history = await fetchHistory(targetCurrency, hours, days);
+        renderChart(history, 'gram');
+      } else {
+        renderChart([], 'gram');
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('price-table-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal memuat data. Coba refresh.</td></tr>';
+    } finally {
+      loadingTable.classList.add('d-none');
+      loadingChart.classList.add('d-none');
+      refreshBtn.disabled = false;
+      currencySelect.disabled = false;
+      rangeSelect.disabled = false;
+      isLoading = false;
+    }
+  }
 
-            document.getElementById('refresh-btn').addEventListener('click', loadAll);
-            document.getElementById('currency-select').addEventListener('change', loadAll);
-            document.getElementById('range-select').addEventListener('change', loadAll);
-            document.addEventListener('DOMContentLoaded', () => fetchCurrencies().then(loadAll).catch(err => alert(err.message)));
-          </script>
-          @endsection
+  document.getElementById('refresh-btn').addEventListener('click', loadAll);
+  document.getElementById('currency-select').addEventListener('change', loadAll);
+  document.getElementById('range-select').addEventListener('change', loadAll);
+  document.addEventListener('DOMContentLoaded', () => fetchCurrencies().then(loadAll).catch(err => alert(err.message)));
+</script>
+@endsection
 
-          @push('styles')
-          <style>
-            /* Tema Telegram penuh */
-            body {
-              background-color: var(--tg-theme-bg-color, #f8f9fa);
-              color: var(--tg-theme-text-color, #212529);
-              font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-              }
-              .card {
-              background-color: var(--tg-theme-secondary-bg-color, #fff);
-              color: var(--tg-theme-text-color, #212529);
-              border: none;
-              border-radius: 1.25rem;
-              transition: transform 0.2s ease, box-shadow 0.2s ease;
-              }
-              .card:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05) !important;
-              }
-              .card-header {
-              background-color: var(--tg-theme-secondary-bg-color, #fff);
-              color: var(--tg-theme-text-color, #212529);
-              border-bottom: 1px solid var(--tg-theme-section-separator-color, #dee2e6);
-              }
-              .table {
-              color: var(--tg-theme-text-color, #212529);
-              }
-              .table thead th {
-              background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
-              border-color: var(--tg-theme-section-separator-color, #dee2e6);
-              }
-              .table-hover tbody tr:hover {
-              background-color: rgba(241,196,15,0.05);
-              }
-              .form-select, .form-control {
-              background-color: var(--tg-theme-bg-color, #fff);
-              color: var(--tg-theme-text-color, #212529);
-              border-color: var(--tg-theme-section-separator-color, #dee2e6);
-              }
-              .input-group-text {
-              background-color: var(--tg-theme-bg-color, #fff);
-              border-color: var(--tg-theme-section-separator-color, #dee2e6);
-              color: var(--tg-theme-hint-color, #6c757d);
-              }
-              .btn-outline-secondary {
-              border-color: var(--tg-theme-section-separator-color, #ced4da);
-              color: var(--tg-theme-hint-color, #6c757d);
-              }
-              .btn-outline-secondary:hover {
-              background-color: var(--tg-theme-secondary-bg-color, #e9ecef);
-              border-color: var(--tg-theme-hint-color, #adb5bd);
-              color: var(--tg-theme-text-color, #495057);
-              }
-              .text-gradient {
-              background: linear-gradient(135deg, #f9a825, #f57c00);
-              -webkit-background-clip: text;
-              background-clip: text;
-              color: transparent;
-              display: inline-block;
-              }
-              @media (max-width: 768px) {
-              .container { padding-left: 1rem; padding-right: 1rem; }
-              .card-body { padding: 1rem; }
-              .table td, .table th { font-size: 0.85rem; }
-              }
-              </style>
-              @endpush
+@push('styles')
+<style>
+  /* Tema Telegram penuh */
+  body {
+    background-color: var(--tg-theme-bg-color, #f8f9fa);
+    color: var(--tg-theme-text-color, #212529);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+    .card {
+    background-color: var(--tg-theme-secondary-bg-color, #fff);
+    color: var(--tg-theme-text-color, #212529);
+    border: none;
+    border-radius: 1.25rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05) !important;
+    }
+    .card-header {
+    background-color: var(--tg-theme-secondary-bg-color, #fff);
+    color: var(--tg-theme-text-color, #212529);
+    border-bottom: 1px solid var(--tg-theme-section-separator-color, #dee2e6);
+    }
+    .table {
+    color: var(--tg-theme-text-color, #212529);
+    }
+    .table thead th {
+    background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
+    border-color: var(--tg-theme-section-separator-color, #dee2e6);
+    }
+    .table-hover tbody tr:hover {
+    background-color: rgba(241,196,15,0.05);
+    }
+    .form-select, .form-control {
+    background-color: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #212529);
+    border-color: var(--tg-theme-section-separator-color, #dee2e6);
+    }
+    .input-group-text {
+    background-color: var(--tg-theme-bg-color, #fff);
+    border-color: var(--tg-theme-section-separator-color, #dee2e6);
+    color: var(--tg-theme-hint-color, #6c757d);
+    }
+    .btn-outline-secondary {
+    border-color: var(--tg-theme-section-separator-color, #ced4da);
+    color: var(--tg-theme-hint-color, #6c757d);
+    }
+    .btn-outline-secondary:hover {
+    background-color: var(--tg-theme-secondary-bg-color, #e9ecef);
+    border-color: var(--tg-theme-hint-color, #adb5bd);
+    color: var(--tg-theme-text-color, #495057);
+    }
+    .text-gradient {
+    background: linear-gradient(135deg, #f9a825, #f57c00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    }
+    @media (max-width: 768px) {
+    .container { padding-left: 1rem; padding-right: 1rem; }
+    .card-body { padding: 1rem; }
+    .table td, .table th { font-size: 0.85rem; }
+    }
+    </style>
+    @endpush
