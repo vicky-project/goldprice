@@ -3,12 +3,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateGoldPricesTable extends Migration
+return new class extends Migration
 {
-  public function up() {
-    Schema::create('gold_prices', function (Blueprint $table) {
+  public function up(): void
+  {
+    Schema::create('gold_prices_current', function (Blueprint $table) {
       $table->id();
-      $table->string('currency', 3)->index(); // e.g. USD, IDR, JPY
+      $table->string('currency', 10)->unique(); // e.g. USD, IDR, JPY
       $table->decimal('ounce', 20, 3); // harga per ounce
       $table->decimal('gram', 20, 3); // harga per gram
       $table->decimal('tola', 20, 3); // harga per tola
@@ -17,7 +18,8 @@ class CreateGoldPricesTable extends Migration
     });
   }
 
-  public function down() {
+  public function down(): void
+  {
     Schema::dropIfExists('gold_prices');
   }
-}
+};

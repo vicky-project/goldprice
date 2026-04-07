@@ -2,13 +2,13 @@
 namespace Modules\GoldPrice\Console;
 
 use Illuminate\Console\Command;
-use Modules\GoldPrice\Services\GoldPriceService;
 use Illuminate\Support\Facades\Log;
+use Modules\GoldPrice\Services\GoldPriceService;
 
 class UpdateGoldPrices extends Command
 {
   protected $signature = 'app:goldprice';
-  protected $description = 'Ambil harga emas terbaru dan simpan jika berubah';
+  protected $description = 'Ambil harga emas terbaru dan simpan ke current + history';
 
   protected $service;
 
@@ -20,16 +20,15 @@ class UpdateGoldPrices extends Command
   public function handle() {
     $this->info('Memperbarui data harga emas...');
     try {
-      $saved = $this->service->updatePricesIfChanged();
-      $this->info("Selesai. $saved currency diperbarui.");
-      Log::info("GoldPrice update completed. {$saved} updated.");
-      return 0;
+      $updated = $this->service->updatePrices();
+      $this->info("Selesai. {$updated} mata uang diperbarui.");
     } catch (\Exception $e) {
-      $this->error('Gagal: '.$e->getMessage());
-      Log::error('GoldPrice update failed: '.$e->getMessage(), [
-        "trace" => $e->getTraceAsString()
+      $this->error('Gagal: ' . $e->getMessage());
+      Log::error('GoldPrice update failed: ' . $e->getMessage(), [
+        'trace' => $e->getTraceAsString()
       ]);
       return 1;
     }
+    return 0;
   }
 }
