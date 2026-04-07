@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Modules\Telegram\Providers\TelegramServiceProvider;
 
 class GoldPriceServiceProvider extends ServiceProvider
 {
@@ -35,6 +36,13 @@ class GoldPriceServiceProvider extends ServiceProvider
     ) {
       $this->registerHooks($class);
     }
+
+    TelegramServiceProvider::registerAppExplicit([
+      'id' => 'gold-price',
+      'name' => 'Harga Emas',
+      'description' => 'Pantau harga emas terkini',
+      'icon' => 'bi-gem'
+    ]);
   }
 
   /**
