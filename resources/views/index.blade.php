@@ -2,21 +2,6 @@
 
 @section('content')
 <div class="container py-4">
-  {{-- Header --}}
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <a href="{{ route('telegram.home') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 disabled">
-          <i class="bi bi-arrow-left me-2"></i>Kembali
-        </a>
-        <h4 class="mb-0 text-gradient fw-semibold">
-          <i class="bi bi-gem2 me-2 text-warning"></i>Harga Emas Dunia
-        </h4>
-        <div></div>
-      </div>
-    </div>
-  </div>
-
   {{-- Filter Panel --}}
   <div class="row mb-4">
     <div class="col-12">
@@ -476,7 +461,7 @@
   }
 
   let chartInstance = null, isLoading = false, allCurrencies = [];
-  const apiBase = '{{ secure_url(config("app.url")) }}/api/gold-price';
+  const apiBase = '{{ config("app.url") }}/api/gold-price';
 
   // Render dropdown dengan filter
   function renderCurrencyOptions(filterText) {

@@ -2,7 +2,7 @@
 
 return [
   'id' => 'gold-price',
-  'name' => 'Harga Emas',
+  'name' => 'Harga Emas Dunia',
   'description' => 'Pantau harga emas terkini',
   'icon_class' => 'bi bi-gem',
   'render_type' => 'iframe',
