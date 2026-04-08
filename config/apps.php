@@ -2,7 +2,11 @@
 
 return [
   'id' => 'gold-price',
-  'name' => 'Harga Emas',
+  'name' => 'Harga Emas Dunia',
   'description' => 'Pantau harga emas terkini',
-  'icon' => 'bi-gem'
+  'icon_class' => 'bi bi-gem',
+  'render_type' => 'iframe',
+  'render_config' => [
+    'url' => env('APP_URL') . '/apps/gold-prices'
+  ]
 ];
