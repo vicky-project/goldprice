@@ -3,100 +3,98 @@
 @section('title', 'Harga Emas')
 
 @section('content')
-<div class="container py-4">
-  {{-- Filter Panel --}}
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header border-0 py-3 px-4">
-          <h5 class="mb-0 fw-semibold"><i class="bi bi-funnel-fill me-2 text-primary"></i>Filter & Pencarian</h5>
-        </div>
-        <div class="card-body px-4 pb-4">
-          <div class="row g-3 align-items-end">
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Cari Mata Uang</label>
-              <div class="input-group shadow-sm">
-                <span class="input-group-text border-end-0"><i class="bi bi-search"></i></span>
-                <input type="text" id="currency-search" class="form-control border-start-0 ps-0" placeholder="Nama / kode ...">
-                <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Hapus pencarian">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Pilih Mata Uang</label>
-              <select id="currency-select" class="form-select shadow-sm">
-                <option value="">-- Semua Mata Uang --</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Rentang Waktu</label>
-              <select id="range-select" class="form-select shadow-sm">
-                <option value="6">6 jam terakhir</option>
-                <option value="24">24 jam terakhir</option>
-                <option value="7" selected>7 hari</option>
-                <option value="30">30 hari</option>
-                <option value="90">90 hari</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <button id="refresh-btn" class="btn btn-primary w-100 shadow-sm rounded-pill py-2">
-                <i class="bi bi-arrow-repeat me-2"></i>Refresh Data
+{{-- Filter Panel --}}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+      <div class="card-header border-0 py-3 px-4">
+        <h5 class="mb-0 fw-semibold"><i class="bi bi-funnel-fill me-2 text-primary"></i>Filter & Pencarian</h5>
+      </div>
+      <div class="card-body px-4 pb-4">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Cari Mata Uang</label>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text border-end-0"><i class="bi bi-search"></i></span>
+              <input type="text" id="currency-search" class="form-control border-start-0 ps-0" placeholder="Nama / kode ...">
+              <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Hapus pencarian">
+                <i class="bi bi-x-lg"></i>
               </button>
             </div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Pilih Mata Uang</label>
+            <select id="currency-select" class="form-select shadow-sm">
+              <option value="">-- Semua Mata Uang --</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Rentang Waktu</label>
+            <select id="range-select" class="form-select shadow-sm">
+              <option value="6">6 jam terakhir</option>
+              <option value="24">24 jam terakhir</option>
+              <option value="7" selected>7 hari</option>
+              <option value="30">30 hari</option>
+              <option value="90">90 hari</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <button id="refresh-btn" class="btn btn-primary w-100 shadow-sm rounded-pill py-2">
+              <i class="bi bi-arrow-repeat me-2"></i>Refresh Data
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  {{-- Konten Utama: Tabel & Chart --}}
-  <div class="row g-4">
-    <div class="col-lg-6">
-      <div class="card border-0 shadow-sm rounded-4 h-100">
-        <div class="card-header border-0 pt-4 px-4 pb-0">
-          <h5 class="mb-0 fw-semibold"><i class="bi bi-table me-2 text-success"></i>Harga Terkini</h5>
-          <hr class="my-2">
+{{-- Konten Utama: Tabel & Chart --}}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm rounded-4 h-100">
+      <div class="card-header border-0 pt-4 px-4 pb-0">
+        <h5 class="mb-0 fw-semibold"><i class="bi bi-table me-2 text-success"></i>Harga Terkini</h5>
+        <hr class="my-2">
+      </div>
+      <div class="card-body p-4 pt-2">
+        <div id="loading-table" class="text-center py-5 d-none">
+          <div class="spinner-border text-primary mb-2" role="status"></div>
+          <p class="text-muted">
+            Memuat data harga ...
+          </p>
         </div>
-        <div class="card-body p-4 pt-2">
-          <div id="loading-table" class="text-center py-5 d-none">
-            <div class="spinner-border text-primary mb-2" role="status"></div>
-            <p class="text-muted">
-              Memuat data harga ...
-            </p>
-          </div>
-          <div class="table-responsive">
-            <table class="table align-middle" id="price-table">
-              <thead>
-                <tr><th>Mata Uang</th><th class="text-end">Ounce (oz)</th><th class="text-end">Gram (g)</th><th class="text-end">Tola</th><th class="text-end">Perubahan (Gram)</th><th>Update</th></tr>
-              </thead>
-              <tbody id="price-table-body">
-                <tr><td colspan="6" class="text-center text-muted py-4">Belum ada data</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="table-responsive">
+          <table class="table align-middle" id="price-table">
+            <thead>
+              <tr><th>Mata Uang</th><th class="text-end">Ounce (oz)</th><th class="text-end">Gram (g)</th><th class="text-end">Tola</th><th class="text-end">Perubahan (Gram)</th><th>Update</th></tr>
+            </thead>
+            <tbody id="price-table-body">
+              <tr><td colspan="6" class="text-center text-muted py-4">Belum ada data</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-    <div class="col-lg-6">
-      <div class="card border-0 shadow-sm rounded-4 h-100">
-        <div class="card-header border-0 pt-4 px-4 pb-0">
-          <h5 class="mb-0 fw-semibold"><i class="bi bi-graph-up me-2 text-info"></i>Grafik Pergerakan</h5>
-          <hr class="my-2">
+  </div>
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm rounded-4 h-100">
+      <div class="card-header border-0 pt-4 px-4 pb-0">
+        <h5 class="mb-0 fw-semibold"><i class="bi bi-graph-up me-2 text-info"></i>Grafik Pergerakan</h5>
+        <hr class="my-2">
+      </div>
+      <div class="card-body p-4 pt-2 position-relative" style="min-height: 300px;">
+        <div id="loading-chart" class="text-center py-5 d-none">
+          <div class="spinner-border text-info mb-2" role="status"></div>
+          <p class="text-muted">
+            Memuat grafik ...
+          </p>
         </div>
-        <div class="card-body p-4 pt-2 position-relative" style="min-height: 300px;">
-          <div id="loading-chart" class="text-center py-5 d-none">
-            <div class="spinner-border text-info mb-2" role="status"></div>
-            <p class="text-muted">
-              Memuat grafik ...
-            </p>
-          </div>
-          <canvas id="price-chart" width="400" height="250" style="display: none;"></canvas>
-          <div id="chart-empty-message" class="text-center py-5 text-muted d-none">
-            <i class="bi bi-bar-chart-steps fs-1"></i><p class="mt-2">
-              Tidak ada data history untuk mata uang ini.
-            </p>
-          </div>
+        <canvas id="price-chart" width="400" height="250" style="display: none;"></canvas>
+        <div id="chart-empty-message" class="text-center py-5 text-muted d-none">
+          <i class="bi bi-bar-chart-steps fs-1"></i><p class="mt-2">
+            Tidak ada data history untuk mata uang ini.
+          </p>
         </div>
       </div>
     </div>
