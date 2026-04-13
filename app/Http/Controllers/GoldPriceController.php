@@ -3,6 +3,7 @@ namespace Modules\GoldPrice\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Modules\GoldPrice\Models\GoldPriceCurrent;
 use Modules\GoldPrice\Models\GoldPriceHistory;
 use Modules\GoldPrice\Models\GoldPriceArchive;
@@ -13,11 +14,14 @@ class GoldPriceController extends Controller
   * Daftar semua mata uang yang tersedia (dari current)
   */
   public function currencies() {
-    $currencies = GoldPriceCurrent::select('currency')
-    ->distinct()
-    ->orderBy('currency')
-    ->pluck('currency');
-    return response()->json($currencies);
+    return Cache::remember('gold_currencies', now()->addHours(), fn() =>
+      response()->json(
+        GoldPriceCurrent::select('currency')
+        ->distinct()
+        ->orderBy('currency')
+        ->pluck('currency')
+      );
+    );
   }
 
   /**
@@ -25,12 +29,16 @@ class GoldPriceController extends Controller
   */
   public function latest(Request $request) {
     $currency = $request->input('currency');
-    $query = GoldPriceCurrent::query();
-    if ($currency) {
-      $query->where('currency', $currency);
-    }
-    $data = $query->orderBy('currency')->get();
-    return response()->json($data);
+    $cacheKey = $currency ? "gold_latest_{$currency}" : "gold_latest_all";
+
+    return Cache::remember($cacheKey, now()->addMinutes(5), function() use($currency) {
+      $query = GoldPriceCurrent::query();
+      if ($currency) {
+        $query->where('currency', $currency);
+      }
+      $data = $query->orderBy('currency')->get();
+      return response()->json($data);
+    });
   }
 
   /**
@@ -44,20 +52,25 @@ class GoldPriceController extends Controller
     ]);
 
     $currency = $request->currency;
+    $hours = $request->input("hours");
+    $days = $request->input("days",
+      30);
 
-    $startDate = now();
-    if ($request->has('hours')) {
-      $startDate = now()->subHours($request->hours);
+    if ($hours) {
+      $cacheKey = "gold_history_{$currency}_hours_{$hours}";
     } else {
-      $startDate = now()->subDays($request->days ?? 30);
+      $cacheKey = "gold_history_{$currency}_days_{$days}";
     }
 
-    $data = GoldPriceHistory::where('currency', $currency)
-    ->where('price_date', '>=', $startDate)
-    ->orderBy('price_date', 'asc')
-    ->get(['price_date', 'ounce', 'gram', 'tola']);
+    return Cache::remember($cacheKey, now()->addHours(), function() use($currency, $hours, $days) {
+      $startDate = $hours ? now()->subHours($hours) : now()->subDays($days);
+      $data = GoldPriceHistory::where('currency', $currency)
+      ->where('price_date', '>=', $startDate)
+      ->orderBy('price_date', 'asc')
+      ->get(['price_date', 'ounce', 'gram', 'tola']);
 
-    return response()->json($data);
+      return response()->json($data);
+    });
   }
 
   /**

@@ -1,6 +1,7 @@
 <?php
 namespace Modules\GoldPrice\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Modules\GoldPrice\Models\GoldPriceCurrent;
@@ -67,6 +68,10 @@ class GoldPriceService
       $updated++;
     }
 
+    if ($updated > 0) {
+      $this->clearCache();
+    }
+
     Log::info("GoldPrice update: {$updated} currencies changed.");
     return $updated;
   }
@@ -97,5 +102,14 @@ class GoldPriceService
 
     Log::info("GoldPrice archive: {$deleted} records moved to archive.");
     return $deleted;
+  }
+
+  private function clearCache(): void {
+    if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore || Cache::getStore() instanceof \Illuminate\Cache\MemcachedStore) {
+      Cache::tags("gold")->flush();
+    }
+
+    Cache::forget("gold_currencies");
+    Cache::forget("gold_latest_all");
   }
 }
