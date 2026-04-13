@@ -20,7 +20,7 @@ class GoldPriceController extends Controller
         ->distinct()
         ->orderBy('currency')
         ->pluck('currency')
-      );
+      )
     );
   }
 
